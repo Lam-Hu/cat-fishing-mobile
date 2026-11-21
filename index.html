@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>小猫寻鱼</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=stick1">
 </head>
 <body>
 <div class="app">
@@ -35,7 +35,7 @@
     <div class="overlay show" id="overlayMenu">
       <div class="panel menu-panel">
         <div class="menu-head"><h2>小猫饿了，出发找鱼吧</h2><p class="menu-intro">三个关卡，同一个目标：让小猫吃饱。</p></div>
-        <p class="menu-intro">点方向键移动，收集鱼让小猫吃饱。</p><div class="version-list" id="versionList">
+        <p class="menu-intro">拨动右下角的圆形摇杆，收集鱼让小猫吃饱。</p><div class="version-list" id="versionList">
           <button class="version-card v1" type="button" data-version="1"><span class="vtag">第 1 关</span><span class="vname">找到食物</span></button>
           <button class="version-card v2" type="button" data-version="2"><span class="vtag">第 2 关</span><span class="vname">躲开巡逻狗</span></button>
           <button class="version-card v3" type="button" data-version="3"><span class="vtag">第 3 关</span><span class="vname">选择路线</span></button>
@@ -52,7 +52,7 @@
           <button class="btn btn-primary" id="btnStart" type="button">开始</button>
           <button class="btn" id="btnBriefMenu" type="button">换一关</button>
         </div>
-        <p class="hint">点一下走一格；按住连续走，松手就不再继续走。</p>
+        <p class="hint">拖动右下角的摇杆移动，松手后走完当前一格就停。</p>
       </div>
     </div>
 
@@ -84,16 +84,14 @@
 
     <div class="toast" id="toast"></div>
   </main>
-  <section class="control-deck" aria-label="手机操控区">
-    <div class="control-caption"><strong>方向控制</strong><span>点一下走一格<br>松手后不再继续走</span></div>
-    <nav class="touch-controls" aria-label="移动小猫">
-    <button type="button" data-dir="up" aria-label="向上">↑</button>
-    <button type="button" data-dir="left" aria-label="向左">←</button>
-    <button type="button" data-dir="down" aria-label="向下">↓</button>
-    <button type="button" data-dir="right" aria-label="向右">→</button>
-      </nav>
-  </section>
+  <div id="joystick" class="joystick" role="group" aria-label="移动摇杆：向上、下、左、右拖动，松手停止">
+    <div class="stick-ring" aria-hidden="true">
+      <i class="stick-mark north"></i><i class="stick-mark east"></i>
+      <i class="stick-mark south"></i><i class="stick-mark west"></i>
+      <span id="stickThumb" class="stick-thumb">🐾</span>
+    </div>
+  </div>
 </div>
-<script src="game.js"></script>
+<script src="game.js?v=stick1"></script>
 </body>
 </html>

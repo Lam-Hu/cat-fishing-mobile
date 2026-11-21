@@ -980,7 +980,7 @@
     G.input.botDir = null;
     G.input.tap = null;
     el.overlayPause.classList.add('show');
-    el.btnPause.hidden = true;
+    updateHUD();
     el.btnResume.focus();
   }
 
@@ -988,7 +988,7 @@
     if (G.state !== 'paused') return;
     G.state = 'playing';
     el.overlayPause.classList.remove('show');
-    el.btnPause.hidden = false;
+    updateHUD();
     canvas.focus();
     Sfx.ensure();
   }
@@ -1435,7 +1435,7 @@
   }
 
   function updateHUD() {
-    if (G.state !== 'playing' && contact) clearTouch();
+    if (G.state !== 'playing' && contact !== null) clearTouch();
     if (!G.ver) return;
     const ver = G.ver;
     el.hudVersion.textContent = ver.tag;
@@ -1443,6 +1443,7 @@
     el.hud.hidden = !duringGame;
     el.btnPause.hidden = G.state !== 'playing';
     document.documentElement.classList.toggle('in-game', duringGame);
+    document.documentElement.classList.toggle('is-playing', G.state === 'playing');
     el.fishLegend.hidden = ver.id !== 3;
 
     if (ver.time != null) {
@@ -1503,43 +1504,58 @@
   document.getElementById('btnNext').addEventListener('click', () => { if (G.state === 'won' && G.version < 3) showBriefing(G.version + 1); });
   el.btnRetry.addEventListener('click', restart);
   el.btnOtherVersion.addEventListener('click', showMenu);
-  // 触屏与键盘使用同一移动队列，关卡规则不变。
-  const touchDirections = {up:[0,-1],left:[-1,0],down:[0,1],right:[1,0]};
-  const directionButtons = [...document.querySelectorAll('[data-dir]')];
+  // 四向摇杆：改变输入方式，不改变格子、速度或计分。
+  const stick = document.getElementById('joystick');
+  const stickThumb = document.getElementById('stickThumb');
   let contact = null;
-  function clearTouch() {
-    G.input.held = G.input.held.filter(h => !h.code.startsWith('touch-'));
-    directionButtons.forEach(button => button.classList.remove('pressed'));
-    contact = null;
+  let stickAxis = null;
+  function setStickDirection(x, y) {
+    G.input.held = G.input.held.filter(h => h.code !== 'touch-stick');
+    if (x || y) G.input.held.push({code:'touch-stick', x, y});
   }
-  for (const button of directionButtons) {
-    const code = 'touch-' + button.dataset.dir;
-    const [x,y] = touchDirections[button.dataset.dir];
-    button.addEventListener('contextmenu', event => event.preventDefault());
-    button.addEventListener('pointerdown', event => {
-      if (G.state !== 'playing' || event.button !== 0) return;
-      event.preventDefault();
-      clearTouch();
-      button.setPointerCapture(event.pointerId);
-      contact = {id:event.pointerId,button};
-      G.input.held.push({code,x,y});
-      G.input.tap = {x,y,until:performance.now()+110};
-      button.classList.add('pressed');
-    });
-    const release = event => {
-      if (contact?.button !== button || contact.id !== event.pointerId) return;
-      clearTouch();
-      if (event.type !== 'pointerup') G.input.tap = null;
-    };
-    for (const type of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(type, release);
+  function clearTouch() {
+    setStickDirection(0,0);
+    contact = null;
+    stickAxis = null;
+    stick.classList.remove('engaged');
+    stickThumb.style.transform = '';
+  }
+  function pointStick(event) {
+    const r = stick.getBoundingClientRect();
+    const dx = event.clientX - r.left - r.width/2;
+    const dy = event.clientY - r.top - r.height/2;
+    const length = Math.hypot(dx,dy);
+    const cap = Math.max(14,r.width*.26);
+    const factor = length > cap ? cap/length : 1;
+    stickThumb.style.transform = `translate(${dx*factor}px,${dy*factor}px)`;
+    if (length < r.width*.13) {
+      stickAxis = null;
+      setStickDirection(0,0);
+      return;
+    }
+    // 接近对角线时保留之前的轴，轻微抖动不会让小猫乱拐。
+    const xWins = Math.abs(dx) > Math.abs(dy) * (stickAxis === 'y' ? 1.18 : .86);
+    stickAxis = xWins ? 'x' : 'y';
+    setStickDirection(xWins ? Math.sign(dx) : 0, xWins ? 0 : Math.sign(dy));
+    if (!G.cat.moving && G.controlLock <= 0) tryStep();
+  }
+  stick.addEventListener('contextmenu', e => e.preventDefault());
+  stick.addEventListener('pointerdown', e => {
+    if (G.state !== 'playing' || contact !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    contact = e.pointerId;
+    G.input.tap = null;
+    stick.setPointerCapture(e.pointerId);
+    stick.classList.add('engaged');
+    pointStick(e);
+  });
+  stick.addEventListener('pointermove', e => { if (contact === e.pointerId) pointStick(e); });
+  for (const ev of ['pointerup','pointercancel','lostpointercapture']) {
+    stick.addEventListener(ev, e => { if (contact === e.pointerId) clearTouch(); });
   }
   window.addEventListener('blur', clearTouch);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      clearTouch();
-      G.input.held = [];
-      G.input.tap = null;
-    }
+    if (document.hidden) { clearTouch(); G.input.held = []; G.input.tap = null; }
   });
   el.btnSound.addEventListener('click', () => {
     Sfx.enabled = !Sfx.enabled;
