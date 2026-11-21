@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>小猫寻鱼</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="style.css?v=adventure1">
+  <link rel="stylesheet" href="style.css?v=threescenes1">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><div class="logo-face"></div><div class="logo-ear left"></div><div class="logo-ear right"></div></div><div class="brand-text"><div class="eyebrow">三幕池塘冒险</div><h1>小猫寻鱼</h1></div></div>
+    <div class="brand"><div class="logo" aria-hidden="true"><div class="logo-face"></div><div class="logo-ear left"></div><div class="logo-ear right"></div></div><div class="brand-text"><div class="eyebrow">三关找鱼小游戏</div><h1>小猫寻鱼</h1></div></div>
     <div class="game-actions">
       <button class="btn" id="btnFullscreen" type="button" hidden>全屏</button>
       <button class="btn" id="btnPause" type="button" hidden>暂停</button>
@@ -30,17 +30,17 @@
   </header>
 
   <main class="stage" id="stage">
-    <canvas id="game" tabindex="-1" width="768" height="528" aria-label="小猫寻鱼游戏画面"></canvas>
+    <div class="map-zone"><canvas id="game" tabindex="-1" width="768" height="528" aria-label="小猫寻鱼游戏画面"></canvas></div>
 
     <div class="overlay show" id="overlayMenu">
       <div class="panel menu-panel adventure-menu">
-        <p class="chapter-label">三幕池塘冒险</p>
+        <p class="chapter-label">三关找鱼小游戏</p>
         <div class="adventure-emblem" aria-hidden="true">✦ <span>🐈</span> ✦</div>
         <h2>小猫寻鱼</h2>
-        <p class="adventure-lede">趁月亮升起前，捡够鱼，<br>点亮三盏灯笼，坐船回家。</p>
+        <p class="adventure-lede">去池塘、竹林和河岸，<br>帮小猫捡鱼吃。</p>
         <div id="journeyLights" class="journey-lights"></div>
         <button class="btn btn-primary" id="beginAdventure" type="button">开始冒险</button>
-        <p class="hint">右下角摇杆移动 · 电脑也可用方向键</p>
+        <p class="hint">拨动右下角摇杆 · 电脑也可用方向键</p>
       </div>
     </div>
 
@@ -49,7 +49,7 @@
         <p class="chapter-label" id="storyTag"></p>
         <h2 id="briefTitle"></h2>
         <p id="briefGoal" class="brief-goal"></p>
-        <ul id="briefRules" class="brief-rules"></ul>
+        <ul id="briefRules" class="brief-rules" hidden></ul>
         <div class="panel-actions">
           <button class="btn btn-primary" id="btnStart" type="button">开始</button>
           <button class="btn" id="btnBriefMenu" type="button">回到起点</button>
@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <p id="journeyGoal" class="journey-goal" hidden></p>
+  
     <div class="toast" id="toast" role="status"></div>
   </main>
   <div id="joystick" class="joystick" role="group" aria-label="移动摇杆：向上、下、左、右拖动，松手停止">
@@ -96,6 +96,6 @@
     </div>
   </div>
 </div>
-<script src="game.js?v=adventure1"></script>
+<script src="game.js?v=threescenes1"></script>
 </body>
 </html>

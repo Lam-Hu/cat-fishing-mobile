@@ -593,3 +593,42 @@ html:not(.in-game) .control-deck { display:none; }
 .journey-stats strong {font-size:19px;color:#285c47;}
 .journey-stats small {font-size:11px;color:#4c6556;}
 @media (max-height:460px) and (orientation:landscape) { .adventure-emblem span {font-size:28px;} .adventure-menu h2{font-size:34px;} .adventure-lede br{display:none;} }
+
+/* Three-scene build: HUD, playfield and joystick occupy disjoint regions. */
+[data-mode="mobile"] .app, [data-mode="mobile"] .stage, [data-mode="mobile"] .joystick {
+ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+}
+.is-playing .stage, .is-playing #game, .joystick { touch-action:none; }
+[data-mode="mobile"] .map-zone {
+ position:absolute;display:grid;place-items:center;
+ inset:max(92px,calc(env(safe-area-inset-top) + 85px)) max(8px,env(safe-area-inset-right))
+       max(139px,calc(env(safe-area-inset-bottom) + 131px)) max(8px,env(safe-area-inset-left));
+ container-type:size;
+}
+[data-mode="mobile"] canvas#game {
+ position:static;transform:none;inset:auto;width:100%;height:100%;
+ object-fit:contain;box-shadow:none;border-radius:0;
+}
+@supports (width:1cqh) {
+ [data-mode="mobile"] canvas#game {width:min(100cqw,calc(100cqh * 768 / 528));height:auto;box-shadow:0 7px 24px #193a344a;border-radius:12px;}
+}
+[data-mode="mobile"] .topbar { align-items:flex-start; flex-wrap:nowrap; }
+[data-mode="mobile"] .hud { min-width:0; }
+[data-mode="mobile"] .fish-legend { margin-top:1px; }
+[data-mode="mobile"] .joystick { --stick-size:clamp(94px,24vw,114px); }
+[data-mode="mobile"] .toast { bottom:27px; max-width:calc(100vw - 145px);left:12px; transform:translateY(8px);white-space:normal;line-height:1.35;padding:7px 11px; }
+[data-mode="mobile"] .toast.show { transform:none; }
+[data-mode="mobile"] .journey-stats {grid-template-columns:1fr;}
+[data-mode="mobile"] .journey-stats small {margin-top:.2em}
+[data-chapter="grass"] .stage {background:radial-gradient(ellipse at 38% 35%,#bfd99f,#74a76f 86%);}
+[data-chapter="bamboo"] .stage {background:radial-gradient(ellipse at 56% 30%,#afc786,#3d7451 85%);}
+[data-chapter="river"] .stage {background:radial-gradient(ellipse at 74% 5%,#86abb7,#27445e 72%);}
+@media(orientation:landscape) and (max-height:550px){
+ [data-mode="mobile"] .map-zone {inset:max(65px,calc(env(safe-area-inset-top) + 57px)) max(139px,calc(env(safe-area-inset-right) + 131px)) 8px max(8px,env(safe-area-inset-left));}
+ [data-mode="mobile"] .joystick {--stick-size:105px;}
+ [data-mode="mobile"] .toast {left:auto;right:9px;bottom:126px;max-width:117px;}
+}
+@media(max-height:530px) and (orientation:portrait){
+ [data-mode="mobile"] .map-zone {bottom:116px; }
+ [data-mode="mobile"] .joystick {--stick-size:90px; bottom:10px;}
+}

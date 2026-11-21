@@ -18,101 +18,70 @@
   const HIT_RADIUS = 30;   // 碰撞半径（像素）
   const BGC = 2;           // 背景离屏画布倍率
 
-  // V1 / V2 共用同一张地图：便于对比“只多了狗和倒计时”
-  const MAP_SHARED = [
+  const MAP_GRASS = [
     'TTTTTTTTTTTTTTTT',
     'T..............T',
-    'T..T..PP...T...T',
-    'T..............T',
-    'T..............T',
-    'T..............T',
-    'T..............T',
-    'T...T..PP..T...T',
-    'T..............T',
+    'T..T...........T',
+    'T.....PPP...T..T',
+    'T....PPPPP.....T',
+    'T....PPPPP.....T',
+    'T.....PPP......T',
+    'T..T...........T',
+    'T...,,,,,,,,,T.T',
     'T..............T',
     'TTTTTTTTTTTTTTTT'
   ];
-
-  // V3：中间一道树墙把地图分成“安全区（左）/ 危险区（右）”
-  // 危险区里再用栅栏把小狗巡逻圈内部切成两个口袋，拿鱼必须反复穿过狗的巡逻线
-  const MAP_V3 = [
+  const MAP_BAMBOO = [
     'TTTTTTTTTTTTTTTT',
-    'T.......T......T',
-    'T..T....T..PP..T',
-    'T...FF..T..PP..T',
-    'T.......T......T',
-    'T....,,,,,,.F..T',
-    'T..T....T...F..T',
-    'T.......T......T',
-    'T...FF..T......T',
-    'T.......T......T',
+    'T..............T',
+    'T.....TTTTT.T..T',
+    'T..TT.T........T',
+    'T.....T........T',
+    'T,,,,,,,,,,,,,,T',
+    'T....,T........T',
+    'T.TT.,T.,,,,,,.T',
+    'T....,T.....TT.T',
+    'T....,,,,,,....T',
     'TTTTTTTTTTTTTTTT'
   ];
-
-  const FISH_SHARED = [
-    [1, 1], [14, 1], [1, 9], [14, 9], [6, 4], [9, 5]
+  const MAP_RIVER = [
+    'TTTTTTTTTTTTTTTT',
+    'T......PPP.....T',
+    'T..TT..PPP..T..T',
+    'T......PPP.....T',
+    'T......PPP.....T',
+    'T....,,,,,,,...T',
+    'T......PPP.....T',
+    'T......PPP.....T',
+    'T.T....PPP...T.T',
+    'T......PPP...T.T',
+    'TTTTTTTTTTTTTTTT'
   ];
-
-  const FISH_V3 = [
-    // 安全区（左）：8 条 × 1 分
-    { x: 1, y: 1, p: 1 }, { x: 6, y: 1, p: 1 },
-    { x: 1, y: 4, p: 1 }, { x: 7, y: 4, p: 1 },
-    { x: 1, y: 7, p: 1 }, { x: 6, y: 7, p: 1 },
-    { x: 2, y: 9, p: 1 }, { x: 7, y: 9, p: 1 },
-    // 危险区（右）：4 条 × 3 分
-    { x: 10, y: 2, p: 3 }, { x: 10, y: 5, p: 3 },
-    { x: 13, y: 6, p: 3 }, { x: 12, y: 8, p: 3 }
-  ];
-
   const ADVENTURE = {
-    1:{title:'暖风浅滩', story:'晚饭时间到了。先到浅滩捡几条鱼，再去岸边的灯笼下。', reward:'浅滩灯笼', exit:[12,5], tone:'dawn'},
-    2:{title:'暮色巡岸', story:'灯笼照出了河岸小路。巡逻狗在找动静，等它走远再穿过去。', reward:'河岸灯笼', exit:[13,8], tone:'dusk'},
-    3:{title:'月光渡口', story:'开往家的小船在等你。金鱼近却危险，慢慢捡普通鱼也能回家。', reward:'渡口灯笼', exit:[14,9], tone:'moon'}
+    1:{title:'草地池塘', story:'绕着池塘捡 3 条鱼。没有狗，慢慢试试摇杆。',tone:'grass'},
+    2:{title:'竹林小径', story:'沿竹林小路捡 5 条鱼。看见巡逻狗，可以等它走开，也可以绕路。',tone:'bamboo'},
+    3:{title:'月光河岸', story:'攒够 6 点就过关。左岸的普通鱼每条 +1；过桥有金鱼，每条 +3，但有巡逻狗。',tone:'river'}
   };
   const VERSIONS = {
     1: {
-      id: 1,
-      tag: '第 1 关',
-      name: '暖风浅滩',
-      map: MAP_SHARED,
-      fish: [[3,5],[5,4],[8,6]],
-      start: [1,5],
-      time: null,
-      targetPoints: 3,
-      dogPath: null,
-      dogSpeed: 0,
-      briefingGoal: ADVENTURE[1].story,
-      briefingRules: ['碰到鱼就收集，每条鱼增加 1 点饱腹度。', '捡齐 3 条鱼，沿小路去亮起来的灯笼。']
+      id:1, tag:'第 1 关', name:ADVENTURE[1].title, map:MAP_GRASS,
+      fish:[{x: 3, y: 5, p: 1}, {x: 5, y: 8, p: 1}, {x: 12, y: 7, p: 1}], start:[1, 5], time:null, targetPoints:3,
+      dogPath:null, dogSpeed:0,
+      safeSpots:[[1, 5], [2, 5], [4, 8]], briefingGoal:ADVENTURE[1].story, briefingRules:[]
     },
+
     2: {
-      id: 2,
-      tag: '第 2 关',
-      name: '暮色巡岸',
-      map: MAP_SHARED,
-      fish: FISH_SHARED,
-      start: [1, 5],
-      time: 44,
-      targetPoints: 5,
-      dogPath: [[4, 3], [11, 3], [11, 6], [4, 6]],
-      dogSpeed: 2.45,
-      safeSpots: [[1, 5], [1, 1], [14, 1], [1, 9], [14, 9], [8, 8]],
-      briefingGoal: ADVENTURE[2].story,
-      briefingRules: ['44 秒内捡够 5 条鱼，赶到河岸的灯笼。', '碰到巡逻狗扣 5 秒，并退回安全处。']
+      id:2, tag:'第 2 关', name:ADVENTURE[2].title, map:MAP_BAMBOO,
+      fish:[{x: 3, y: 5, p: 1}, {x: 5, y: 8, p: 1}, {x: 8, y: 5, p: 1}, {x: 11, y: 7, p: 1}, {x: 14, y: 4, p: 1}, {x: 10, y: 3, p: 1}], start:[1, 5], time:null, targetPoints:5,
+      dogPath:[[8, 4], [13, 4], [13, 7], [8, 7]], dogSpeed:2.2,
+      safeSpots:[[1, 5], [2, 5], [4, 8]], briefingGoal:ADVENTURE[2].story, briefingRules:[]
     },
+
     3: {
-      id: 3,
-      tag: '第 3 关',
-      name: '月光渡口',
-      map: MAP_V3,
-      fish: FISH_V3,
-      start: [3, 5],
-      time: 55,
-      targetPoints: 8,
-      dogPath: [[9, 4], [14, 4], [14, 5], [13, 5], [13, 7], [14, 7], [9, 7]],
-      dogSpeed: 2.85,
-      safeSpots: [[3, 5], [1, 1], [6, 1], [1, 7], [6, 9], [7, 5]],
-      briefingGoal: ADVENTURE[3].story,
-      briefingRules: ['55 秒内攒够 8 点饱腹度，再去右下角渡口。普通鱼 +1，金鱼 +3。', '碰到巡逻狗扣 5 秒，并退回安全处。']
+      id:3, tag:'第 3 关', name:ADVENTURE[3].title, map:MAP_RIVER,
+      fish:[{x: 2, y: 2, p: 1}, {x: 5, y: 2, p: 1}, {x: 2, y: 5, p: 1}, {x: 5, y: 6, p: 1}, {x: 3, y: 8, p: 1}, {x: 6, y: 9, p: 1}, {x: 11, y: 4, p: 3}, {x: 13, y: 6, p: 3}, {x: 11, y: 8, p: 3}], start:[1, 5], time:null, targetPoints:6,
+      dogPath:[[10, 3], [14, 3], [14, 7], [10, 7]], dogSpeed:2.45,
+      safeSpots:[[1, 5], [2, 5], [4, 8]], briefingGoal:ADVENTURE[3].story, briefingRules:[]
     }
   };
 
@@ -173,7 +142,7 @@
     version: 1,
     ver: VERSIONS[1],
     state: 'menu',           // menu | briefing | playing | paused | won | lost
-    map: MAP_SHARED,
+    map: MAP_GRASS,
     fish: [],
     cat: null,
     dog: null,
@@ -306,6 +275,9 @@
     g.scale(BGC, BGC);
 
     const ponds = [];
+    const theme = G.version;
+    const ground = theme===1 ? ['#a2d495','#9bcc8d'] : theme===2 ? ['#789e71','#70946a'] : ['#527e78','#4b7471'];
+    const path = theme===1 ? ['#ead7a8','#e0cc9c'] : theme===2 ? ['#dcc59b','#d0b98d'] : ['#aa866c','#9b765e'];
 
     // 鱼和出生点所在格不画装饰，避免影响辨识
     const decoBlocked = new Set();
@@ -321,11 +293,14 @@
         if (ch === 'P') { ponds.push([x, y]); continue; }
 
         const isPath = ch === ',';
-        g.fillStyle = isPath ? ((x + y) % 2 ? '#ecd9b1' : '#e7d2a8')
-                             : ((x + y) % 2 ? '#a9d5a0' : '#a3ce9a');
-        g.fillRect(px, py, TILE, TILE);
+        g.fillStyle=(isPath?path:ground)[(x+y)%2];
+        g.fillRect(px,py,TILE,TILE);
 
-        if (isPath) {
+        if (isPath && theme===3 && x>=7 && x<=9) {
+          g.strokeStyle='#584939'; g.lineWidth=2.5;
+          for(let i=0;i<6;i++) {g.beginPath();g.moveTo(px+i*8,py);g.lineTo(px+i*8,py+TILE);g.stroke();}
+          g.fillStyle='#e4bb8e';g.fillRect(px,py+3,TILE,4);g.fillRect(px,py+TILE-7,TILE,4);
+        } else if (isPath) {
           for (let i = 0; i < 5; i++) {
             const rx = px + 6 + hash(x + i * 7, y + i * 3) * 36;
             const ry = py + 6 + hash(x + i * 5, y + i * 9) * 36;
@@ -386,8 +361,8 @@
       const px = x * TILE;
       const py = y * TILE;
       const grad = g.createLinearGradient(px, py, px, py + TILE);
-      grad.addColorStop(0, '#93d4ec');
-      grad.addColorStop(1, '#66b2d9');
+      grad.addColorStop(0, theme===3?'#386687':'#8cd7e3');
+      grad.addColorStop(1, theme===3?'#284b6d':'#64b4cf');
       g.fillStyle = grad;
       g.fillRect(px, py, TILE, TILE);
 
@@ -398,7 +373,7 @@
         { n: [x - 1, y], side: 'left' },
         { n: [x + 1, y], side: 'right' }
       ];
-      g.fillStyle = '#e9d7ae';
+      g.fillStyle = theme===3?'#74988a':'#e9d7ae';
       edges.forEach(({ n, side }) => {
         if (n[0] < 0 || n[1] < 0 || n[0] >= COLS || n[1] >= ROWS) return;
         if (map[n[1]][n[0]] === 'P') return;
@@ -413,7 +388,7 @@
       g.fillRect(px + 4, py + 8, TILE - 8, 2);
 
       // 睡莲叶
-      if (hash(x * 5 + 1, y * 3 + 2) > 0.45) {
+      if (theme===1 && hash(x * 5 + 1, y * 3 + 2) > 0.45) {
         const lx = px + 18 + hash(x, y) * 12;
         const ly = py + 26 + hash(y, x) * 10;
         g.fillStyle = 'rgba(38, 80, 60, 0.18)';
@@ -427,7 +402,7 @@
       }
 
       // 芦苇
-      if (hash(x * 11 + 3, y * 7 + 5) > 0.55) {
+      if (theme===1 && hash(x * 11 + 3, y * 7 + 5) > 0.55) {
         const rx = px + 8 + hash(x + 1, y + 2) * 30;
         const ry = py + TILE - 5;
         g.strokeStyle = '#5f9257';
@@ -454,11 +429,34 @@
     }
     objects.sort((a, b) => a.y - b.y || a.x - b.x);
     objects.forEach(o => {
-      if (o.ch === 'T') drawTree(g, o.x, o.y);
+      if (o.ch === 'T') { if(theme===2) drawBamboo(g,o.x,o.y); else if(theme===3) drawRiverRock(g,o.x,o.y); else drawTree(g,o.x,o.y); }
       else drawFence(g, o.x, o.y, map);
     });
 
     return cv;
+  }
+
+  function drawBamboo(g,gx,gy) {
+    const cx=gx*TILE+24, y=gy*TILE+43, h=33+hash(gx,gy)*9;
+    g.fillStyle='#375d45';ellipse(g,cx,y+1,15,5);
+    for(let k=-1;k<=1;k++){
+      const x=cx+k*8, length=h-Math.abs(k)*7;
+      g.strokeStyle=k===0?'#adcf76':'#80ad55';g.lineWidth=5;g.lineCap='round';
+      g.beginPath();g.moveTo(x,y);g.lineTo(x+k*3,y-length);g.stroke();
+      g.strokeStyle='#5c884e';g.lineWidth=1.6;
+      for(let n=1;n<=3;n++){g.beginPath();g.moveTo(x-3,y-length*n/4);g.lineTo(x+3,y-length*n/4);g.stroke();}
+      g.fillStyle=k===0?'#3e7845':'#59884b';
+      for(let l=0;l<3;l++) {
+        const by=y-length+7+l*6, side=(k+l)%2===0?-1:1;
+        g.beginPath();g.moveTo(x,by);g.quadraticCurveTo(x+side*13,by-13,x+side*18,by-11);g.quadraticCurveTo(x+side*9,by-2,x,by);g.fill();
+      }
+    }
+  }
+  function drawRiverRock(g,gx,gy){
+    const x=gx*TILE+24,y=gy*TILE+27;
+    g.fillStyle='#294b52';ellipse(g,x,y+10,17,11);
+    g.fillStyle='#75908c';g.beginPath();g.moveTo(x-17,y+7);g.lineTo(x-11,y-7);g.lineTo(x+4,y-12);g.lineTo(x+16,y-3);g.lineTo(x+17,y+8);g.closePath();g.fill();
+    g.strokeStyle='#aec0a5';g.lineWidth=2;g.beginPath();g.moveTo(x-10,y-5);g.lineTo(x+3,y-10);g.lineTo(x+11,y-5);g.stroke();
   }
 
   function drawTree(g, gx, gy) {
@@ -895,7 +893,7 @@
     });
   }
 
-  const saveKey = 'cat-fishing-adventure-v1';
+  const saveKey = 'cat-fishing-three-scenes-v1';
   function loadJourney() {
     try {
       const j = JSON.parse(localStorage.getItem(saveKey));
@@ -906,14 +904,13 @@
   }
   let journey = loadJourney();
   const storyTag = document.getElementById('storyTag');
-  const footerGoal = document.getElementById('journeyGoal');
   const journeyStats = document.getElementById('journeyStats');
   const journeyLights = document.getElementById('journeyLights');
   const beginAdventure = document.getElementById('beginAdventure');
   function saveJourney() { try { localStorage.setItem(saveKey,JSON.stringify(journey)); } catch (_) {} }
   function resetJourney() { journey={legs:[]}; saveJourney(); }
   function buildLights(count) {
-    return ['浅滩','巡岸','渡口'].map((name,i) => {
+    return ['池塘','竹林','河岸'].map((name,i) => {
       const node=document.createElement('span');
       node.textContent=(i<count ? '✦ ' : '◇ ')+name;
       node.className=i<count?'lit':'';
@@ -922,7 +919,7 @@
   }
   function updateJourneyResult() {
     journeyStats.hidden=false;
-    const entries=[['捡到的鱼',journey.legs.reduce((s,l)=>s+l.fish,0)],['成功用时',Math.ceil(journey.legs.reduce((s,l)=>s+l.seconds,0))+' 秒'],['撞到巡逻狗',journey.legs.reduce((s,l)=>s+l.hits,0)+' 次']];
+    const entries=[['总共捡到',journey.legs.reduce((s,l)=>s+l.fish,0)+' 条鱼']];
     journeyStats.replaceChildren(...entries.map(([label,value])=>{
       const item=document.createElement('div'), n=document.createElement('strong'), caption=document.createElement('small');
       n.textContent=value; caption.textContent=label; item.append(n,caption); return item;
@@ -949,11 +946,9 @@
       face: 1
     } : null;
     G.timeLeft = ver.time;
-    G.exitReady=false;
     G.lastHudSeconds=null;
     document.documentElement.dataset.chapter=ADVENTURE[v].tone;
-    footerGoal.textContent=v===3?'找鱼，然后到渡口':'找鱼，点亮前路';
-    footerGoal.hidden=true;
+
     G.elapsed = 0;
     G.score = 0;
     G.collected = 0;
@@ -983,9 +978,9 @@
     setupVersion(version);
     hideOverlays();
     clearToast();
-    storyTag.textContent='第 '+version+' 幕 / 3';
+    storyTag.textContent='第 '+version+' 关 / 3';
     el.briefTitle.textContent = G.ver.name;
-    el.btnStart.textContent = version===3 ? '去渡口' : '出发';
+    el.btnStart.textContent = '开始';
     el.briefGoal.textContent = G.ver.briefingGoal;
     el.briefRules.replaceChildren(...G.ver.briefingRules.map(rule => {
       const item = document.createElement('li');
@@ -1071,7 +1066,8 @@
     }
     journeyStats.hidden=true;
     el.overlayResult.classList.toggle('finale',win && G.version===3);
-    el.btnRetry.textContent=win && G.version===3?'再玩一趟':'重试这一关';
+    el.btnRetry.textContent=win && G.version===3?'再玩一次':'重试这一关';
+    el.btnOtherVersion.hidden=win && G.version===3;
     el.btnRetry.hidden=win && G.version<3;
     document.getElementById('btnNext').hidden = !win || G.version === 3;
     el.btnOtherVersion.textContent = '回到起点';
@@ -1079,13 +1075,13 @@
     el.resultMark.classList.toggle('lose', !win);
 
     if (win) {
-      el.resultTitle.textContent = G.version === 3 ? '小猫到家啦！' : ADVENTURE[G.version].reward+'点亮了';
-      el.resultSub.textContent = G.version===3?'三个灯笼都亮了。你带着满满的鱼，赶上了回家的船。':G.version===1?'前面是暮色河岸。巡逻狗出现前，先看看哪条路好走。':'最后一段路通往月光渡口。小船就在那边等你。';
+      el.resultTitle.textContent = G.version === 3 ? '小猫吃饱啦！' : ADVENTURE[G.version].title+' · 过关';
+      el.resultSub.textContent = G.version===3?'池塘、竹林、河岸，三关都玩完了。':G.version===1?'前方是竹林小径。':'前方是月光河岸。';
       if(G.version===3) updateJourneyResult();
-      else document.getElementById('btnNext').textContent=G.version===1?'前往暮色巡岸 →':'前往月光渡口 →';
+      else document.getElementById('btnNext').textContent='下一关 →';
     } else {
       el.resultTitle.textContent = '差一点，灯笼还在等你';
-      el.resultSub.textContent = G.exitReady ? '鱼已经够了，下次直接朝亮起的出口跑。' : `还差 ${Math.max(0, goal-G.score)} 点饱腹度。重试这一关，不用从头再来。`;
+      el.resultSub.textContent = `还差 ${Math.max(0, goal-G.score)} 点饱腹度。重试这一关，不用从头再来。`;
     }
 
     setTimeout(() => {
@@ -1099,14 +1095,7 @@
   }
 
   function checkWin() {
-    if (!G.exitReady && G.score >= satietyGoal(G.ver)) {
-      G.exitReady=true;
-      footerGoal.hidden=false;
-      footerGoal.textContent=G.version===3?'鱼够了 · 去亮起的渡口':'鱼够了 · 去亮起的灯笼';
-      toast(footerGoal.textContent,1500);
-    }
-    const [x,y]=ADVENTURE[G.version].exit;
-    if (G.exitReady && G.cat.x===x && G.cat.y===y) endGame(true);
+    if (G.score >= satietyGoal(G.ver)) endGame(true);
   }
 
   /* 连续移动跨格携带当前帧剩余时间，松手时仍可完成当前一格。 */
@@ -1222,10 +1211,10 @@
 
     const from = catPixel();
     burst(from.x, from.y, '#ff9a8a', 12, 140);
-    popup(G.cat.x, G.cat.y, `撞到小狗 −${HIT_PENALTY} 秒`, '#ff8f80');
+    popup(G.cat.x, G.cat.y, '回到安全处', '#ff8f80');
 
     teleportSafe();
-    toast(`撞到小狗 · −${HIT_PENALTY} 秒 · 已回到安全处`, 1650);
+    toast('碰到巡逻狗，回到安全处。捡到的鱼还在。', 1600);
 
     const to = cellCenter(G.cat.x, G.cat.y);
     burst(to.x, to.y, '#ffe0b8', 10, 90);
@@ -1335,19 +1324,6 @@
       });
       ctx.restore();
     }
-
-    const [exitX,exitY]=ADVENTURE[G.version].exit;
-    const door=cellCenter(exitX,exitY);
-    ctx.save();
-    ctx.strokeStyle=G.exitReady?'#fffbc6':'#2f584e';
-    ctx.fillStyle=G.exitReady?'#fed678':'#517a6c';
-    ctx.lineWidth=3;
-    if(G.exitReady){ctx.shadowColor='#ffec86';ctx.shadowBlur=14+Math.sin(t*5)*4;}
-    ctx.beginPath();ctx.arc(door.x,door.y,16,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.shadowBlur=0;
-    ctx.font='bold 20px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle=G.exitReady?'#573b27':'#e3edcc';
-    ctx.fillText(G.version===3?'⚓':'✦',door.x,door.y+1);
-    ctx.restore();
 
     if (G.dog) drawPatrolPath(ctx, G.dog);
 
@@ -1573,7 +1549,8 @@
   const stick = document.getElementById('joystick');
   const stickThumb = document.getElementById('stickThumb');
   let contact = null;
-  let stickAxis = null;
+  let stickAxis = null, stickRect = null;
+  function clearSelection(){ const selection=getSelection(); if(selection && !selection.isCollapsed) selection.removeAllRanges(); }
   function setStickDirection(x, y) {
     G.input.held = G.input.held.filter(h => h.code !== 'touch-stick');
     if (x || y) G.input.held.push({code:'touch-stick', x, y});
@@ -1582,24 +1559,26 @@
     setStickDirection(0,0);
     contact = null;
     stickAxis = null;
+    stickRect = null;
     stick.classList.remove('engaged');
     stickThumb.style.transform = '';
   }
   function pointStick(event) {
-    const r = stick.getBoundingClientRect();
+    const r = stickRect;
+    if (!r) return;
     const dx = event.clientX - r.left - r.width/2;
     const dy = event.clientY - r.top - r.height/2;
     const length = Math.hypot(dx,dy);
     const cap = Math.max(14,r.width*.26);
     const factor = length > cap ? cap/length : 1;
     stickThumb.style.transform = `translate(${dx*factor}px,${dy*factor}px)`;
-    if (length < r.width*.105) {
+    if (length < r.width*(stickAxis ? .13 : .19)) {
       stickAxis = null;
       setStickDirection(0,0);
       return;
     }
     // 接近对角线时保留之前的轴，轻微抖动不会让小猫乱拐。
-    const xWins = Math.abs(dx) > Math.abs(dy) * (stickAxis === 'y' ? 1.18 : .86);
+    const xWins = Math.abs(dx) > Math.abs(dy) * (stickAxis === 'y' ? 1.27 : stickAxis === 'x' ? .78 : 1);
     stickAxis = xWins ? 'x' : 'y';
     setStickDirection(xWins ? Math.sign(dx) : 0, xWins ? 0 : Math.sign(dy));
     if (!G.cat.moving && G.controlLock <= 0) tryStep();
@@ -1609,6 +1588,8 @@
     if (G.state !== 'playing' || contact !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
     e.preventDefault();
     contact = e.pointerId;
+    stickRect=stick.getBoundingClientRect();
+    clearSelection();
     G.input.tap = null;
     stick.setPointerCapture(e.pointerId);
     stick.classList.add('engaged');
@@ -1619,6 +1600,11 @@
     stick.addEventListener(ev, e => { if (contact === e.pointerId) clearTouch(); });
   }
   window.addEventListener('blur', clearTouch);
+  window.addEventListener('resize', clearTouch);
+  for (const type of ['selectstart','dragstart','contextmenu']) {
+    document.addEventListener(type,e=>{if(G.state==='playing')e.preventDefault();},true);
+  }
+  document.addEventListener('touchmove',e=>{if(contact!==null && e.cancelable)e.preventDefault();},{passive:false});
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { clearTouch(); G.input.held = []; G.input.tap = null; }
   });
