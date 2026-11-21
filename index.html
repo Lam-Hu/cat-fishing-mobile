@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN" data-mode="mobile">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>小猫寻鱼</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo" aria-hidden="true"><div class="logo-face"></div><div class="logo-ear left"></div><div class="logo-ear right"></div></div><div class="brand-text"><div class="eyebrow">池塘游戏 · 课堂试玩</div><h1>小猫寻鱼</h1></div></div>
+    <div class="game-actions">
+      <button class="btn" id="btnFullscreen" type="button" hidden>全屏</button>
+      <button class="btn" id="btnPause" type="button" hidden>暂停</button>
+    </div>
+    <div class="hud" id="hud" hidden>
+      <div class="pill pill-score">
+        <span class="vbadge" id="hudVersion">V1</span><span>饱腹度</span>
+        <progress id="hudFullness" value="0" max="6" aria-label="饱腹进度"></progress>
+        <span><strong id="hudScore">0</strong><span id="hudScoreUnit"> / 6</span></span>
+      </div>
+      <div class="pill pill-time" id="pillTime" hidden><span class="dot"></span><strong id="hudTime"></strong><span class="unit">秒</span></div>
+      <div id="fishLegend" class="fish-legend" hidden>
+        <span><i class="fish-key ordinary" aria-hidden="true"></i>普通鱼 +1</span>
+        <span><i class="fish-key golden" aria-hidden="true">★</i>金鱼 +3</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <canvas id="game" tabindex="-1" width="768" height="528" aria-label="小猫寻鱼游戏画面"></canvas>
+
+    <div class="overlay show" id="overlayMenu">
+      <div class="panel menu-panel">
+        <div class="menu-head"><h2>小猫饿了，出发找鱼吧</h2><p class="menu-intro">三个关卡，同一个目标：让小猫吃饱。</p></div>
+        <p class="menu-intro">点方向键移动，收集鱼让小猫吃饱。</p><div class="version-list" id="versionList">
+          <button class="version-card v1" type="button" data-version="1"><span class="vtag">第 1 关</span><span class="vname">找到食物</span></button>
+          <button class="version-card v2" type="button" data-version="2"><span class="vtag">第 2 关</span><span class="vname">躲开巡逻狗</span></button>
+          <button class="version-card v3" type="button" data-version="3"><span class="vtag">第 3 关</span><span class="vname">选择路线</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlayBrief">
+      <div class="panel brief-panel">
+        <h2 id="briefTitle"></h2>
+        <p id="briefGoal" class="brief-goal"></p>
+        <ul id="briefRules" class="brief-rules"></ul>
+        <div class="panel-actions">
+          <button class="btn btn-primary" id="btnStart" type="button">开始</button>
+          <button class="btn" id="btnBriefMenu" type="button">换一关</button>
+        </div>
+        <p class="hint">点一下走一格；按住连续走，松手就不再继续走。</p>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlayPause">
+      <div class="panel small-panel">
+        <h3>已暂停</h3>
+        <div class="panel-actions">
+          <button class="btn btn-primary" id="btnResume" type="button">继续</button>
+          <button class="btn" id="btnPauseRestart" type="button">重来</button>
+          <button class="btn" id="btnPauseMenu" type="button">换一关</button>
+          <button class="btn btn-ghost" id="btnSound" type="button">音效 开</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlayResult">
+      <div class="panel small-panel">
+        <div class="result-head">
+          <div class="result-mark" id="resultMark" aria-hidden="true"></div>
+          <div><h3 id="resultTitle"></h3><p id="resultSub" class="muted"></p></div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn btn-primary" id="btnNext" type="button" hidden>下一关</button>
+          <button class="btn" id="btnRetry" type="button">再试一次</button>
+          <button class="btn" id="btnOtherVersion" type="button">换一关</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </main>
+  <section class="control-deck" aria-label="手机操控区">
+    <div class="control-caption"><strong>方向控制</strong><span>点一下走一格<br>松手后不再继续走</span></div>
+    <nav class="touch-controls" aria-label="移动小猫">
+    <button type="button" data-dir="up" aria-label="向上">↑</button>
+    <button type="button" data-dir="left" aria-label="向左">←</button>
+    <button type="button" data-dir="down" aria-label="向下">↓</button>
+    <button type="button" data-dir="right" aria-label="向右">→</button>
+      </nav>
+  </section>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
