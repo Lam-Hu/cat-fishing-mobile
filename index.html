@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>小猫寻鱼</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="style.css?v=stick1">
+  <link rel="stylesheet" href="style.css?v=adventure1">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><div class="logo-face"></div><div class="logo-ear left"></div><div class="logo-ear right"></div></div><div class="brand-text"><div class="eyebrow">池塘游戏 · 课堂试玩</div><h1>小猫寻鱼</h1></div></div>
+    <div class="brand"><div class="logo" aria-hidden="true"><div class="logo-face"></div><div class="logo-ear left"></div><div class="logo-ear right"></div></div><div class="brand-text"><div class="eyebrow">三幕池塘冒险</div><h1>小猫寻鱼</h1></div></div>
     <div class="game-actions">
       <button class="btn" id="btnFullscreen" type="button" hidden>全屏</button>
       <button class="btn" id="btnPause" type="button" hidden>暂停</button>
@@ -33,24 +33,26 @@
     <canvas id="game" tabindex="-1" width="768" height="528" aria-label="小猫寻鱼游戏画面"></canvas>
 
     <div class="overlay show" id="overlayMenu">
-      <div class="panel menu-panel">
-        <div class="menu-head"><h2>小猫饿了，出发找鱼吧</h2><p class="menu-intro">三个关卡，同一个目标：让小猫吃饱。</p></div>
-        <p class="menu-intro">拨动右下角的圆形摇杆，收集鱼让小猫吃饱。</p><div class="version-list" id="versionList">
-          <button class="version-card v1" type="button" data-version="1"><span class="vtag">第 1 关</span><span class="vname">找到食物</span></button>
-          <button class="version-card v2" type="button" data-version="2"><span class="vtag">第 2 关</span><span class="vname">躲开巡逻狗</span></button>
-          <button class="version-card v3" type="button" data-version="3"><span class="vtag">第 3 关</span><span class="vname">选择路线</span></button>
-        </div>
+      <div class="panel menu-panel adventure-menu">
+        <p class="chapter-label">三幕池塘冒险</p>
+        <div class="adventure-emblem" aria-hidden="true">✦ <span>🐈</span> ✦</div>
+        <h2>小猫寻鱼</h2>
+        <p class="adventure-lede">趁月亮升起前，捡够鱼，<br>点亮三盏灯笼，坐船回家。</p>
+        <div id="journeyLights" class="journey-lights"></div>
+        <button class="btn btn-primary" id="beginAdventure" type="button">开始冒险</button>
+        <p class="hint">右下角摇杆移动 · 电脑也可用方向键</p>
       </div>
     </div>
 
     <div class="overlay" id="overlayBrief">
       <div class="panel brief-panel">
+        <p class="chapter-label" id="storyTag"></p>
         <h2 id="briefTitle"></h2>
         <p id="briefGoal" class="brief-goal"></p>
         <ul id="briefRules" class="brief-rules"></ul>
         <div class="panel-actions">
           <button class="btn btn-primary" id="btnStart" type="button">开始</button>
-          <button class="btn" id="btnBriefMenu" type="button">换一关</button>
+          <button class="btn" id="btnBriefMenu" type="button">回到起点</button>
         </div>
         <p class="hint">拖动右下角的摇杆移动，松手后走完当前一格就停。</p>
       </div>
@@ -62,7 +64,7 @@
         <div class="panel-actions">
           <button class="btn btn-primary" id="btnResume" type="button">继续</button>
           <button class="btn" id="btnPauseRestart" type="button">重来</button>
-          <button class="btn" id="btnPauseMenu" type="button">换一关</button>
+          <button class="btn" id="btnPauseMenu" type="button">回到起点</button>
           <button class="btn btn-ghost" id="btnSound" type="button">音效 开</button>
         </div>
       </div>
@@ -74,6 +76,7 @@
           <div class="result-mark" id="resultMark" aria-hidden="true"></div>
           <div><h3 id="resultTitle"></h3><p id="resultSub" class="muted"></p></div>
         </div>
+        <div id="journeyStats" class="journey-stats" hidden></div>
         <div class="panel-actions">
           <button class="btn btn-primary" id="btnNext" type="button" hidden>下一关</button>
           <button class="btn" id="btnRetry" type="button">再试一次</button>
@@ -82,7 +85,8 @@
       </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <p id="journeyGoal" class="journey-goal" hidden></p>
+    <div class="toast" id="toast" role="status"></div>
   </main>
   <div id="joystick" class="joystick" role="group" aria-label="移动摇杆：向上、下、左、右拖动，松手停止">
     <div class="stick-ring" aria-hidden="true">
@@ -92,6 +96,6 @@
     </div>
   </div>
 </div>
-<script src="game.js?v=stick1"></script>
+<script src="game.js?v=adventure1"></script>
 </body>
 </html>

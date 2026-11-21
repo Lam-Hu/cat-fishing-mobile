@@ -554,3 +554,42 @@ html:not(.in-game) .control-deck { display:none; }
 }
 @media (max-height:620px) and (orientation:portrait) { [data-mode="mobile"] canvas#game { top:46%; } }
 @media(prefers-reduced-motion:reduce){ .stick-thumb { transition:none; } }
+
+/* Adventure art direction: riverbank storybook, from warm shore to moonlit pier. */
+:root { --story-ink:#214c40; --story-paper:#fff7df; }
+[data-mode="mobile"] .stage { background-color:#79a66b; }
+[data-chapter="dusk"] .stage {
+ background:radial-gradient(ellipse at top right,#f5c58e 0%,transparent 57%),radial-gradient(ellipse at center,#8fa36b,#3e765c 83%);
+}
+[data-chapter="moon"] .stage { background:radial-gradient(ellipse at 80% 0%,#a7dbd0 0%,transparent 52%),radial-gradient(ellipse at center,#568b77,#264e57 88%); }
+[data-chapter="dusk"] canvas {filter:sepia(.12) saturate(.93);}
+[data-chapter="moon"] canvas {filter: hue-rotate(13deg) saturate(.83);}
+[data-mode="mobile"] .overlay { background:#18392fb5; }
+[data-mode="mobile"] .overlay .panel {
+ background:linear-gradient(150deg,#fff9e7,#fbefd1);border:1px solid #fffdf1;
+ color:var(--story-ink); border-radius:24px;box-shadow:0 15px 50px #122b2666;
+}
+[data-mode="mobile"] .adventure-menu { text-align:center; max-width:445px; width: min(93%,445px);padding:clamp(17px,4vw,28px); }
+.chapter-label { font-size:12px;letter-spacing:.2em;font-weight:800;color:#4d725b;margin:0 0 .55rem;}
+.adventure-emblem {color:#bb7829; font-size:20px;line-height:1.1;margin:6px auto;}
+.adventure-emblem span { font-size:46px;vertical-align:middle;margin:0 9px; }
+.adventure-menu h2 { margin:.12em 0; color:#234b3d;font-size:clamp(34px,10vw,58px);font-weight:900;letter-spacing:.05em; }
+.adventure-lede {color:#465e50;font-weight:650;margin:.55rem 0 .8rem; }
+.journey-lights {display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:0 0 1rem;}
+.journey-lights span {border:1px solid #e2d7b7;padding:3px 7px;border-radius:18px;font-size:12px;color:#4d6356;white-space:nowrap;}
+.journey-lights .lit {background:#f4d487;border-color:#e9bf69;color:#523d23;}
+[data-mode="mobile"] .btn-primary {background:#285f46;color:#fffdf3;border:1px solid #294f40;box-shadow:0 3px 0 #1f4736;font-weight:800; }
+[data-mode="mobile"] .brief-panel h2 {font-size:clamp(25px,7vw,39px);}
+[data-mode="mobile"] .brief-panel .brief-goal {font-size:16px;font-weight:650;}
+.journey-goal { position:absolute;z-index:4;left:14px;bottom:max(35px,env(safe-area-inset-bottom));background:#173e30dd;color:#fff5cf;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:750;margin:0;pointer-events:none;}
+#overlayResult .small-panel {width:min(93%,440px);}
+#overlayResult .result-mark {flex:none; }
+#overlayResult.finale .result-head {text-align:center;display:block;}
+#overlayResult.finale .result-mark {display:grid;margin:0 auto .5em;background:#ffe5a0;color:#765522;border-color:#ffcc66;}
+#overlayResult.finale h3 {font-size:clamp(29px,8vw,43px);color:#214c40;}
+.journey-stats {display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:13px 0;}
+.journey-stats div {padding:7px 4px;text-align:center;border-radius:12px;background:#fffdf1;border:1px solid #e5d7ae;}
+.journey-stats strong,.journey-stats small {display:block;}
+.journey-stats strong {font-size:19px;color:#285c47;}
+.journey-stats small {font-size:11px;color:#4c6556;}
+@media (max-height:460px) and (orientation:landscape) { .adventure-emblem span {font-size:28px;} .adventure-menu h2{font-size:34px;} .adventure-lede br{display:none;} }

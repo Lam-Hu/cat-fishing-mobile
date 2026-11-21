@@ -13,7 +13,7 @@
   const ROWS = 11;
   const W = COLS * TILE;   // 768
   const H = ROWS * TILE;   // 528
-  const STEP_MS = 165;     // 走一格的时间，保证按键响应稳定
+  const STEP_MS = 150;     // 走一格的时间，保证按键响应稳定
   const HIT_PENALTY = 5;   // 撞狗扣秒
   const HIT_RADIUS = 30;   // 碰撞半径（像素）
   const BGC = 2;           // 背景离屏画布倍率
@@ -64,50 +64,55 @@
     { x: 13, y: 6, p: 3 }, { x: 12, y: 8, p: 3 }
   ];
 
+  const ADVENTURE = {
+    1:{title:'暖风浅滩', story:'晚饭时间到了。先到浅滩捡几条鱼，再去岸边的灯笼下。', reward:'浅滩灯笼', exit:[12,5], tone:'dawn'},
+    2:{title:'暮色巡岸', story:'灯笼照出了河岸小路。巡逻狗在找动静，等它走远再穿过去。', reward:'河岸灯笼', exit:[13,8], tone:'dusk'},
+    3:{title:'月光渡口', story:'开往家的小船在等你。金鱼近却危险，慢慢捡普通鱼也能回家。', reward:'渡口灯笼', exit:[14,9], tone:'moon'}
+  };
   const VERSIONS = {
     1: {
       id: 1,
       tag: '第 1 关',
-      name: '找到食物',
+      name: '暖风浅滩',
       map: MAP_SHARED,
-      fish: FISH_SHARED,
-      start: [1, 5],
+      fish: [[3,5],[5,4],[8,6]],
+      start: [1,5],
       time: null,
-      targetPoints: null,
+      targetPoints: 3,
       dogPath: null,
       dogSpeed: 0,
-      briefingGoal: '让小猫吃饱就通关。',
-      briefingRules: ['碰到鱼就收集，每条鱼增加 1 点饱腹度。', '收集 6 条鱼，让小猫吃饱。']
+      briefingGoal: ADVENTURE[1].story,
+      briefingRules: ['碰到鱼就收集，每条鱼增加 1 点饱腹度。', '捡齐 3 条鱼，沿小路去亮起来的灯笼。']
     },
     2: {
       id: 2,
       tag: '第 2 关',
-      name: '躲开巡逻狗',
+      name: '暮色巡岸',
       map: MAP_SHARED,
       fish: FISH_SHARED,
       start: [1, 5],
-      time: 25,
-      targetPoints: null,
+      time: 44,
+      targetPoints: 5,
       dogPath: [[4, 3], [11, 3], [11, 6], [4, 6]],
-      dogSpeed: 2.8,
+      dogSpeed: 2.45,
       safeSpots: [[1, 5], [1, 1], [14, 1], [1, 9], [14, 9], [8, 8]],
-      briefingGoal: '25 秒内让小猫吃饱。',
-      briefingRules: ['每条鱼增加 1 点饱腹度，吃饱需要 6 点。', '碰到巡逻狗扣 5 秒，并退回安全处。']
+      briefingGoal: ADVENTURE[2].story,
+      briefingRules: ['44 秒内捡够 5 条鱼，赶到河岸的灯笼。', '碰到巡逻狗扣 5 秒，并退回安全处。']
     },
     3: {
       id: 3,
       tag: '第 3 关',
-      name: '选择路线',
+      name: '月光渡口',
       map: MAP_V3,
       fish: FISH_V3,
       start: [3, 5],
-      time: 24,
+      time: 55,
       targetPoints: 8,
       dogPath: [[9, 4], [14, 4], [14, 5], [13, 5], [13, 7], [14, 7], [9, 7]],
-      dogSpeed: 3.4,
+      dogSpeed: 2.85,
       safeSpots: [[3, 5], [1, 1], [6, 1], [1, 7], [6, 9], [7, 5]],
-      briefingGoal: '24 秒内让小猫吃饱。',
-      briefingRules: ['普通鱼增加 1 点饱腹度，金鱼增加 3 点；吃饱需要 8 点。', '碰到巡逻狗扣 5 秒，并退回安全处。']
+      briefingGoal: ADVENTURE[3].story,
+      briefingRules: ['55 秒内攒够 8 点饱腹度，再去右下角渡口。普通鱼 +1，金鱼 +3。', '碰到巡逻狗扣 5 秒，并退回安全处。']
     }
   };
 
@@ -152,7 +157,7 @@
   const bgs = new Map();
 
   function fitCanvas() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -890,6 +895,39 @@
     });
   }
 
+  const saveKey = 'cat-fishing-adventure-v1';
+  function loadJourney() {
+    try {
+      const j = JSON.parse(localStorage.getItem(saveKey));
+      if (j && Array.isArray(j.legs) && j.legs.length <= 3 &&
+          j.legs.every(x => x && Number.isFinite(x.fish) && Number.isFinite(x.seconds) && Number.isFinite(x.hits))) return j;
+    } catch (_) {}
+    return {legs:[]};
+  }
+  let journey = loadJourney();
+  const storyTag = document.getElementById('storyTag');
+  const footerGoal = document.getElementById('journeyGoal');
+  const journeyStats = document.getElementById('journeyStats');
+  const journeyLights = document.getElementById('journeyLights');
+  const beginAdventure = document.getElementById('beginAdventure');
+  function saveJourney() { try { localStorage.setItem(saveKey,JSON.stringify(journey)); } catch (_) {} }
+  function resetJourney() { journey={legs:[]}; saveJourney(); }
+  function buildLights(count) {
+    return ['浅滩','巡岸','渡口'].map((name,i) => {
+      const node=document.createElement('span');
+      node.textContent=(i<count ? '✦ ' : '◇ ')+name;
+      node.className=i<count?'lit':'';
+      return node;
+    });
+  }
+  function updateJourneyResult() {
+    journeyStats.hidden=false;
+    const entries=[['捡到的鱼',journey.legs.reduce((s,l)=>s+l.fish,0)],['成功用时',Math.ceil(journey.legs.reduce((s,l)=>s+l.seconds,0))+' 秒'],['撞到巡逻狗',journey.legs.reduce((s,l)=>s+l.hits,0)+' 次']];
+    journeyStats.replaceChildren(...entries.map(([label,value])=>{
+      const item=document.createElement('div'), n=document.createElement('strong'), caption=document.createElement('small');
+      n.textContent=value; caption.textContent=label; item.append(n,caption); return item;
+    }));
+  }
   function setupVersion(v) {
     const ver = VERSIONS[v];
     G.version = v;
@@ -911,6 +949,11 @@
       face: 1
     } : null;
     G.timeLeft = ver.time;
+    G.exitReady=false;
+    G.lastHudSeconds=null;
+    document.documentElement.dataset.chapter=ADVENTURE[v].tone;
+    footerGoal.textContent=v===3?'找鱼，然后到渡口':'找鱼，点亮前路';
+    footerGoal.hidden=true;
     G.elapsed = 0;
     G.score = 0;
     G.collected = 0;
@@ -940,7 +983,9 @@
     setupVersion(version);
     hideOverlays();
     clearToast();
-    el.briefTitle.textContent = `${G.ver.tag} · ${G.ver.name}`;
+    storyTag.textContent='第 '+version+' 幕 / 3';
+    el.briefTitle.textContent = G.ver.name;
+    el.btnStart.textContent = version===3 ? '去渡口' : '出发';
     el.briefGoal.textContent = G.ver.briefingGoal;
     el.briefRules.replaceChildren(...G.ver.briefingRules.map(rule => {
       const item = document.createElement('li');
@@ -970,7 +1015,9 @@
     hideOverlays();
     clearToast();
     el.overlayMenu.classList.add('show');
-    el.overlayMenu.querySelector(`[data-version="${G.version}"]`).focus();
+    journeyLights.replaceChildren(...buildLights(journey.legs.length));
+    beginAdventure.textContent=journey.legs.length>0 && journey.legs.length<3?'继续冒险':'开始冒险';
+    beginAdventure.focus();
   }
 
   function pauseGame() {
@@ -1017,23 +1064,34 @@
 
     const ver = G.ver;
     const goal = satietyGoal(ver);
+    if(win) {
+      journey.legs[G.version-1]={fish:G.collected,seconds:G.elapsed,hits:G.collisions};
+      journey.legs.length=G.version;
+      saveJourney();
+    }
+    journeyStats.hidden=true;
+    el.overlayResult.classList.toggle('finale',win && G.version===3);
+    el.btnRetry.textContent=win && G.version===3?'再玩一趟':'重试这一关';
+    el.btnRetry.hidden=win && G.version<3;
     document.getElementById('btnNext').hidden = !win || G.version === 3;
-    el.btnOtherVersion.textContent = win && G.version === 3 ? '返回选关' : '换一关';
+    el.btnOtherVersion.textContent = '回到起点';
     el.resultMark.textContent = win ? '✓' : '!';
     el.resultMark.classList.toggle('lose', !win);
 
     if (win) {
-      el.resultTitle.textContent = G.version === 3 ? '最后一关完成！' : '小猫吃饱了！';
-      el.resultSub.textContent = `饱腹度达到 ${goal} 格，顺利通关。`;
+      el.resultTitle.textContent = G.version === 3 ? '小猫到家啦！' : ADVENTURE[G.version].reward+'点亮了';
+      el.resultSub.textContent = G.version===3?'三个灯笼都亮了。你带着满满的鱼，赶上了回家的船。':G.version===1?'前面是暮色河岸。巡逻狗出现前，先看看哪条路好走。':'最后一段路通往月光渡口。小船就在那边等你。';
+      if(G.version===3) updateJourneyResult();
+      else document.getElementById('btnNext').textContent=G.version===1?'前往暮色巡岸 →':'前往月光渡口 →';
     } else {
-      el.resultTitle.textContent = '时间到，还差一点';
-      el.resultSub.textContent = `还差 ${Math.max(0, goal - G.score)} 格饱腹度。`;
+      el.resultTitle.textContent = '差一点，灯笼还在等你';
+      el.resultSub.textContent = G.exitReady ? '鱼已经够了，下次直接朝亮起的出口跑。' : `还差 ${Math.max(0, goal-G.score)} 点饱腹度。重试这一关，不用从头再来。`;
     }
 
     setTimeout(() => {
       if (G.state === 'won' || G.state === 'lost') {
         el.overlayResult.classList.add('show');
-        el.btnRetry.focus();
+        (el.btnRetry.hidden?document.getElementById('btnNext'):el.btnRetry).focus();
       }
     }, 460);
 
@@ -1041,35 +1099,31 @@
   }
 
   function checkWin() {
-    const ver = G.ver;
-    if (ver.targetPoints != null) {
-      if (G.score >= ver.targetPoints) endGame(true);
-    } else if (G.collected >= ver.fish.length) {
-      endGame(true);
+    if (!G.exitReady && G.score >= satietyGoal(G.ver)) {
+      G.exitReady=true;
+      footerGoal.hidden=false;
+      footerGoal.textContent=G.version===3?'鱼够了 · 去亮起的渡口':'鱼够了 · 去亮起的灯笼';
+      toast(footerGoal.textContent,1500);
     }
+    const [x,y]=ADVENTURE[G.version].exit;
+    if (G.exitReady && G.cat.x===x && G.cat.y===y) endGame(true);
   }
 
-  /* ============================================================
-   * 10. 更新
-   * ============================================================ */
+  /* 连续移动跨格携带当前帧剩余时间，松手时仍可完成当前一格。 */
   function updateCat(dt) {
-    const cat = G.cat;
-    const wasMoving = cat.moving;
-
-    if (cat.moving) {
-      cat.p += dt / STEP_MS;
-      if (cat.p >= 1) {
-        cat.p = 1;
-        cat.moving = false;
-        cat.x = cat.to.x;
-        cat.y = cat.to.y;
-        onArrive();
+    let remaining=dt;
+    for(let i=0;i<3 && remaining>0 && G.state==='playing';i++){
+      if(!G.cat.moving){
+        if (G.controlLock>0) return;
+        tryStep();
+        if(!G.cat.moving) return;
       }
+      const cat=G.cat, need=(1-cat.p)*STEP_MS;
+      if(remaining<need){cat.p+=remaining/STEP_MS; return;}
+      remaining-=need;
+      cat.p=1;cat.moving=false;cat.x=cat.to.x;cat.y=cat.to.y;
+      onArrive();
     }
-
-    // 到达新格子的当帧不再立刻起步，下一帧再读取方向，
-    // 避免“用上一格的方向继续走”造成往复抖动。
-    if (!wasMoving && !cat.moving && G.controlLock <= 0 && G.state === 'playing') tryStep();
   }
 
   function tryStep() {
@@ -1104,8 +1158,8 @@
       if (fish.p > 1) Sfx.big(); else Sfx.collect();
       G.invuln = Math.max(G.invuln, 0.12);
       updateHUD();
-      checkWin();
     }
+    checkWin();
   }
 
   function updateDog(dt) {
@@ -1229,7 +1283,8 @@
         return;
       }
       tickSecond();
-      updateHUD();
+      const seconds=Math.ceil(G.timeLeft*10);
+      if(seconds!==G.lastHudSeconds){G.lastHudSeconds=seconds;el.hudTime.textContent=(seconds/10).toFixed(1);el.pillTime.classList.toggle('warn',seconds<=100);}
     } else {
       G.elapsed += dt / 1000;
     }
@@ -1280,6 +1335,19 @@
       });
       ctx.restore();
     }
+
+    const [exitX,exitY]=ADVENTURE[G.version].exit;
+    const door=cellCenter(exitX,exitY);
+    ctx.save();
+    ctx.strokeStyle=G.exitReady?'#fffbc6':'#2f584e';
+    ctx.fillStyle=G.exitReady?'#fed678':'#517a6c';
+    ctx.lineWidth=3;
+    if(G.exitReady){ctx.shadowColor='#ffec86';ctx.shadowBlur=14+Math.sin(t*5)*4;}
+    ctx.beginPath();ctx.arc(door.x,door.y,16,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+    ctx.font='bold 20px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=G.exitReady?'#573b27':'#e3edcc';
+    ctx.fillText(G.version===3?'⚓':'✦',door.x,door.y+1);
+    ctx.restore();
 
     if (G.dog) drawPatrolPath(ctx, G.dog);
 
@@ -1383,7 +1451,7 @@
       if (e.target.closest('button')) return;
       e.preventDefault();
       if (e.repeat) return;
-      if (G.state === 'menu') showBriefing(1);
+      if (G.state === 'menu') beginAdventure.click();
       else if (G.state === 'briefing') startVersion(G.version);
       else if (G.state === 'won' || G.state === 'lost') restart();
       else if (G.state === 'paused') resumeGame();
@@ -1407,11 +1475,6 @@
       return;
     }
 
-    if (G.state === 'menu') {
-      if (e.code === 'Digit1' || e.code === 'Numpad1') showBriefing(1);
-      if (e.code === 'Digit2' || e.code === 'Numpad2') showBriefing(2);
-      if (e.code === 'Digit3' || e.code === 'Numpad3') showBriefing(3);
-    }
   });
 
   document.addEventListener('keyup', e => {
@@ -1473,9 +1536,11 @@
     toastTimer = setTimeout(() => el.toast.classList.remove('show'), ms || 2200);
   }
 
-  document.querySelectorAll('.version-card').forEach(card => {
-    card.addEventListener('click', () => showBriefing(Number(card.dataset.version)));
-  });
+  function startJourney() {
+    if(journey.legs.length===3) resetJourney();
+    showBriefing(journey.legs.length+1);
+  }
+  beginAdventure.addEventListener('click',startJourney);
   const fullscreen = document.getElementById('btnFullscreen');
   const fullTarget = document.documentElement;
   const hasFullscreen = !!(document.fullscreenEnabled && fullTarget.requestFullscreen);
@@ -1502,7 +1567,7 @@
   el.btnPauseRestart.addEventListener('click', restart);
   el.btnPauseMenu.addEventListener('click', showMenu);
   document.getElementById('btnNext').addEventListener('click', () => { if (G.state === 'won' && G.version < 3) showBriefing(G.version + 1); });
-  el.btnRetry.addEventListener('click', restart);
+  el.btnRetry.addEventListener('click', () => { if(G.state==='won' && G.version===3){resetJourney();showBriefing(1);} else restart(); });
   el.btnOtherVersion.addEventListener('click', showMenu);
   // 四向摇杆：改变输入方式，不改变格子、速度或计分。
   const stick = document.getElementById('joystick');
@@ -1528,7 +1593,7 @@
     const cap = Math.max(14,r.width*.26);
     const factor = length > cap ? cap/length : 1;
     stickThumb.style.transform = `translate(${dx*factor}px,${dy*factor}px)`;
-    if (length < r.width*.13) {
+    if (length < r.width*.105) {
       stickAxis = null;
       setStickDirection(0,0);
       return;
@@ -1702,8 +1767,6 @@
   /* ============================================================
    * 16. 启动
    * ============================================================ */
-  const requestedVersion = Number(new URLSearchParams(location.search).get('version'));
-  if (Object.hasOwn(VERSIONS, requestedVersion)) showBriefing(requestedVersion);
-  else showMenu();
+  showMenu();
   requestAnimationFrame(frame);
 })();
